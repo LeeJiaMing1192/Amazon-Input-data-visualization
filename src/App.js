@@ -2,13 +2,21 @@ import React, { useState } from 'react';
 import './App.css';
 import Parser from './Parser';
 import OrderParser from './OrderParser';
+import BrandPerformanceParser from './BrandPerformanceParser';
+import ReturnParser from './ReturnParser';
 import Dashboard from './Dashboard';
 import OrderDashboard from './OrderDashboard';
+import BrandPerformanceDashboard from './BrandPerformanceDashboard';
+import ReturnDashboard from './ReturnDashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Tabs, Tab, Container, Row, Col, Card } from 'react-bootstrap';
 
 function App() {
-  const [data, setData] = useState([]);
+  const [salesData, setSalesData] = useState([]);
   const [orderData, setOrderData] = useState([]);
+  const [brandPerformanceData, setBrandPerformanceData] = useState([]);
+  const [returnData, setReturnData] = useState([]);
+  const [key, setKey] = useState('sales'); // State for active tab
 
   return (
     <div className="App">
@@ -18,38 +26,66 @@ function App() {
         </div>
       </nav>
 
-      <div className="container-fluid mt-4">
-        <div className="row">
-          <div className="col-md-6">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Upload Sales Data</h5>
-                <Parser onDataParsed={setData} />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Upload Order Data</h5>
+      <Container className="mt-4">
+        <Row>
+          <Col md={3}>
+            <Card className="mb-3">
+              <Card.Body>
+                <Card.Title>Upload Sales Data</Card.Title>
+                <Parser onDataParsed={setSalesData} />
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="mb-3">
+              <Card.Body>
+                <Card.Title>Upload Order Data</Card.Title>
                 <OrderParser onDataParsed={setOrderData} />
-              </div>
-            </div>
-          </div>
-        </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="mb-3">
+              <Card.Body>
+                <Card.Title>Upload Brand Performance Data</Card.Title>
+                <BrandPerformanceParser onDataParsed={setBrandPerformanceData} />
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="mb-3">
+              <Card.Body>
+                <Card.Title>Upload Return Data</Card.Title>
+                <ReturnParser onDataParsed={setReturnData} />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-        <div className="row mt-4">
-          <div className="col-md-12">
-            <Dashboard data={data} />
-          </div>
-        </div>
-
-        <div className="row mt-4">
-          <div className="col-md-12">
-            <OrderDashboard data={orderData} />
-          </div>
-        </div>
-      </div>
+        <Row className="mt-4">
+          <Col md={12}>
+            <Tabs
+              id="dashboard-tabs"
+              activeKey={key}
+              onSelect={(k) => setKey(k)}
+              className="mb-3"
+            >
+              <Tab eventKey="sales" title="Sales Dashboard">
+                <Dashboard data={salesData} />
+              </Tab>
+              <Tab eventKey="orders" title="Order Dashboard">
+                <OrderDashboard data={orderData} />
+              </Tab>
+              <Tab eventKey="brand" title="Brand Performance Dashboard">
+                <BrandPerformanceDashboard data={brandPerformanceData} />
+              </Tab>
+              <Tab eventKey="returns" title="Return Dashboard">
+                <ReturnDashboard data={returnData} />
+              </Tab>
+            </Tabs>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }

@@ -2,10 +2,8 @@
 import React, { useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-import Dashboard from './Dashboard';
 
-const Parser = () => {
-  const [data, setData] = useState([]);
+const Parser = ({ onDataParsed }) => {
   const [error, setError] = useState('');
 
   const handleFileChange = (e) => {
@@ -15,7 +13,6 @@ const Parser = () => {
       return;
     }
 
-    onFileName(file.name);
     const fileExtension = file.name.split('.').pop().toLowerCase();
     if (fileExtension === 'csv') {
       parseCSV(file);
@@ -73,15 +70,16 @@ const Parser = () => {
       'Ordered Product Sales - B2B', 'Total Order Items', 'Total Order Items - B2B'
     ];
 
-    const filteredData = parsedData.map(row => {
-      const newRow = {};
-      requiredColumns.forEach(col => {
-        newRow[col] = row[col] || '';
-      });
-      return newRow;
-    });
+    const headers = Object.keys(parsedData[0] || {});
+    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
 
-    setData(filteredData);
+    if (missingColumns.length > 0) {
+        setError(`The following columns are missing: ${missingColumns.join(', ')}`);
+        onDataParsed([]);
+        return;
+    }
+
+    onDataParsed(parsedData);
     setError('');
   };
 
@@ -89,7 +87,6 @@ const Parser = () => {
     <div>
       <input type="file" onChange={handleFileChange} accept=".csv, .xlsx" />
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <Dashboard data={data} />
     </div>
   );
 };

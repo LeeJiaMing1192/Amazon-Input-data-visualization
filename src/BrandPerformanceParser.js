@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import { excelSerialDateToJSDate } from './utils'; // Added this import
 
-const OrderParser = ({ onDataParsed }) => {
+const BrandPerformanceParser = ({ onDataParsed }) => {
   const [error, setError] = useState('');
 
   const handleFileChange = (e) => {
@@ -11,7 +12,6 @@ const OrderParser = ({ onDataParsed }) => {
       setError('Please select a file.');
       return;
     }
-    console.log('Order data file selected:', file.name);
 
     const fileExtension = file.name.split('.').pop().toLowerCase();
     if (fileExtension === 'csv') {
@@ -53,12 +53,27 @@ const OrderParser = ({ onDataParsed }) => {
   };
 
   const processData = (parsedData) => {
-        const requiredColumns = [
-        'Date', 'amazon-order-id', 'merchant-order-id', 'purchase-date', 'last-updated-date', 'order-status', 'fulfillment-channel', 'sales-channel', 'ship-service-level', 'product-name', 'sku', 'asin', 'item-status', 'tax-collection-model', 'tax-collection-responsible-party', 'quantity', 'currency', 'item-price', 'item-tax', 'ship-city', 'ship-state', 'ship-postal-code', 'ship-country', 'payment-method-details', 'is-business-order', 'is-replacement-order', 'is-exchange-order', 'is-transparency', 'signature-confirmation-recommended'
+    const requiredColumns = [
+      'Date',
+      'ASIN',
+      'Title',
+      'Brand Name',
+      'Average Customer Review',
+      'Number of Customer Reviews',
+      'Sales Rank',
+      'Featured Offer (Buy Box) Percentage',
+      'Featured Offer (Buy Box) Percentage - B2B'
     ];
 
-    const headers = Object.keys(parsedData[2]);
-    console.log('Detected headers for OrderParser:', headers);
+    if (!parsedData || parsedData.length === 0) {
+        setError('No data found in the file.');
+        onDataParsed([]);
+        return;
+    }
+
+    const headers = Object.keys(parsedData[0]);
+    console.log('Detected headers:', headers);
+
     const missingColumns = requiredColumns.filter(col => !headers.includes(col));
 
     if (missingColumns.length > 0) {
@@ -67,7 +82,14 @@ const OrderParser = ({ onDataParsed }) => {
         return;
     }
 
-    onDataParsed(parsedData.slice(2));
+    const processedDatesData = parsedData.map(row => ({
+        ...row,
+        Date: typeof row.Date === 'number' ? excelSerialDateToJSDate(row.Date) : new Date(row.Date)
+    }));
+
+    console.log('Raw parsed data (first 5 rows) from BrandPerformanceParser:', processedDatesData.slice(0, 5).map(row => row.Date));
+
+    onDataParsed(processedDatesData);
     setError('');
   };
 
@@ -79,4 +101,4 @@ const OrderParser = ({ onDataParsed }) => {
   );
 };
 
-export default OrderParser;
+export default BrandPerformanceParser;
