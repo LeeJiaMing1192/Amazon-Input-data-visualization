@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { excelSerialDateToJSDate } from './utils'; // Added this import
@@ -6,8 +7,8 @@ import { excelSerialDateToJSDate } from './utils'; // Added this import
 const BrandPerformanceParser = ({ onDataParsed }) => {
   const [error, setError] = useState('');
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const onDrop = useCallback((acceptedFiles) => {
+    const file = acceptedFiles[0];
     if (!file) {
       setError('Please select a file.');
       return;
@@ -21,7 +22,7 @@ const BrandPerformanceParser = ({ onDataParsed }) => {
     } else {
       setError('Unsupported file type. Please select a CSV or XLSX file.');
     }
-  };
+  }, [onDataParsed]);
 
   const parseCSV = (file) => {
     Papa.parse(file, {
@@ -93,9 +94,16 @@ const BrandPerformanceParser = ({ onDataParsed }) => {
     setError('');
   };
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} accept=".csv, .xlsx" />
+    <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''}`}>
+      <input {...getInputProps()} accept=".csv, .xlsx" />
+      {
+        isDragActive ?
+          <p>Drop the files here ...</p> :
+          <p>Drag 'n' drop some files here, or click to select files</p>
+      }
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );

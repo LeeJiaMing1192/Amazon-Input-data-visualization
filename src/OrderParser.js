@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
 const OrderParser = ({ onDataParsed }) => {
   const [error, setError] = useState('');
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const onDrop = useCallback((acceptedFiles) => {
+    const file = acceptedFiles[0];
     if (!file) {
       setError('Please select a file.');
       return;
     }
-    console.log('Order data file selected:', file.name);
 
     const fileExtension = file.name.split('.').pop().toLowerCase();
     if (fileExtension === 'csv') {
@@ -21,7 +21,7 @@ const OrderParser = ({ onDataParsed }) => {
     } else {
       setError('Unsupported file type. Please select a CSV or XLSX file.');
     }
-  };
+  }, [onDataParsed]);
 
   const parseCSV = (file) => {
     Papa.parse(file, {
@@ -53,27 +53,21 @@ const OrderParser = ({ onDataParsed }) => {
   };
 
   const processData = (parsedData) => {
-        const requiredColumns = [
-        'Date', 'amazon-order-id', 'merchant-order-id', 'purchase-date', 'last-updated-date', 'order-status', 'fulfillment-channel', 'sales-channel', 'ship-service-level', 'product-name', 'sku', 'asin', 'item-status', 'tax-collection-model', 'tax-collection-responsible-party', 'quantity', 'currency', 'item-price', 'item-tax', 'ship-city', 'ship-state', 'ship-postal-code', 'ship-country', 'payment-method-details', 'is-business-order', 'is-replacement-order', 'is-exchange-order', 'is-transparency', 'signature-confirmation-recommended'
-    ];
-
-    const headers = Object.keys(parsedData[2]);
-    console.log('Detected headers for OrderParser:', headers);
-    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
-
-    if (missingColumns.length > 0) {
-        setError(`The following columns are missing: ${missingColumns.join(', ')}`);
-        onDataParsed([]);
-        return;
-    }
-
-    onDataParsed(parsedData.slice(2));
+    // Add specific column checks for order data if needed
+    onDataParsed(parsedData);
     setError('');
   };
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} accept=".csv, .xlsx" />
+    <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''}`}>
+      <input {...getInputProps()} accept=".csv, .xlsx" />
+      {
+        isDragActive ?
+          <p>Drop the files here ...</p> :
+          <p>Drag 'n' drop some files here, or click to select files</p>
+      }
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );

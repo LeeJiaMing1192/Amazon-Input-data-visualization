@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import './App.css';
-import Parser from './Parser';
-import OrderParser from './OrderParser';
-import BrandPerformanceParser from './BrandPerformanceParser';
-import ReturnParser from './ReturnParser';
 import Dashboard from './Dashboard';
 import OrderDashboard from './OrderDashboard';
 import BrandPerformanceDashboard from './BrandPerformanceDashboard';
 import ReturnDashboard from './ReturnDashboard';
+import OrderReportDashboard from './OrderReportDashboard';
+import SalesAndTrafficDashboard from './SalesAndTrafficDashboard';
+import FileUpload from './FileUpload';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Tabs, Tab, Container, Row, Col, Card } from 'react-bootstrap';
+import { Tabs, Tab, Container, Row, Col } from 'react-bootstrap';
+import { GraphUp, BoxSeam, Trophy, ArrowReturnLeft, FileEarmarkText, BarChartSteps } from 'react-bootstrap-icons';
 
 function App() {
-  const [salesData, setSalesData] = useState([]);
-  const [orderData, setOrderData] = useState([]);
-  const [brandPerformanceData, setBrandPerformanceData] = useState([]);
-  const [returnData, setReturnData] = useState([]);
-  const [key, setKey] = useState('sales'); // State for active tab
+  const [data, setData] = useState({
+    sales: [],
+    order: [],
+    brand: [],
+    return: [],
+    order_report: [],
+    sales_and_traffic: [],
+  });
+  const [key, setKey] = useState('sales');
+
+  const handleDataParsed = (dataType, parsedData) => {
+    setData((prevData) => ({
+      ...prevData,
+      [dataType]: parsedData,
+    }));
+  };
 
   return (
     <div className="App">
@@ -27,40 +38,7 @@ function App() {
       </nav>
 
       <Container className="mt-4">
-        <Row>
-          <Col md={3}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title>Upload Sales Data</Card.Title>
-                <Parser onDataParsed={setSalesData} />
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title>Upload Order Data</Card.Title>
-                <OrderParser onDataParsed={setOrderData} />
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title>Upload Brand Performance Data</Card.Title>
-                <BrandPerformanceParser onDataParsed={setBrandPerformanceData} />
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Title>Upload Return Data</Card.Title>
-                <ReturnParser onDataParsed={setReturnData} />
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+        <FileUpload onDataParsed={handleDataParsed} />
 
         <Row className="mt-4">
           <Col md={12}>
@@ -70,17 +48,23 @@ function App() {
               onSelect={(k) => setKey(k)}
               className="mb-3"
             >
-              <Tab eventKey="sales" title="Sales Dashboard">
-                <Dashboard data={salesData} />
+              <Tab eventKey="sales" title={<><GraphUp className="me-2" /> Sales Dashboard</>}>
+                <Dashboard data={data.sales} />
               </Tab>
-              <Tab eventKey="orders" title="Order Dashboard">
-                <OrderDashboard data={orderData} />
+              <Tab eventKey="orders" title={<><BoxSeam className="me-2" /> Order Dashboard</>}>
+                <OrderDashboard data={data.order} />
               </Tab>
-              <Tab eventKey="brand" title="Brand Performance Dashboard">
-                <BrandPerformanceDashboard data={brandPerformanceData} />
+              <Tab eventKey="brand" title={<><Trophy className="me-2" /> Brand Performance Dashboard</>}>
+                <BrandPerformanceDashboard data={data.brand} />
               </Tab>
-              <Tab eventKey="returns" title="Return Dashboard">
-                <ReturnDashboard data={returnData} />
+              <Tab eventKey="returns" title={<><ArrowReturnLeft className="me-2" /> Return Dashboard</>}>
+                <ReturnDashboard data={data.return} />
+              </Tab>
+              <Tab eventKey="order_report" title={<><FileEarmarkText className="me-2" /> Order Report Dashboard</>}>
+                <OrderReportDashboard data={data.order_report} />
+              </Tab>
+              <Tab eventKey="sales_and_traffic" title={<><BarChartSteps className="me-2" /> Sales and Traffic Dashboard</>}>
+                <SalesAndTrafficDashboard data={data.sales_and_traffic} />
               </Tab>
             </Tabs>
           </Col>
