@@ -27,6 +27,17 @@ function App() {
       ...prevData,
       [dataType]: parsedData,
     }));
+
+    const tabKeys = {
+      sales: 'sales',
+      order: 'orders',
+      brand: 'brand',
+      return: 'returns',
+      order_report: 'order_report',
+      sales_and_traffic: 'sales_and_traffic',
+    };
+
+    setKey(tabKeys[dataType]);
   };
 
   return (
